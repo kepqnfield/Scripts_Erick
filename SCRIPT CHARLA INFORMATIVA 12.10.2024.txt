@@ -1,0 +1,146 @@
+Sub ImportarYMapear()
+    Dim wsPlantilla As Worksheet
+    Dim wsBase As Worksheet
+    Dim LastRow As Long
+    Dim TargetRow As Long
+    Dim cell As Range
+    Dim wbBase As Workbook
+    Dim rutaArchivo As String
+    Dim ws As Worksheet
+    Dim codigoBBDD As String
+    
+    ' Solicitar la ruta del archivo base
+    rutaArchivo = Application.GetOpenFilename(FileFilter:="Archivos de Excel (*.xlsx), *.xlsx", Title:="Selecciona el archivo base")
+    
+    If rutaArchivo = "False" Then Exit Sub ' Si no se selecciona ningún archivo, salir del sub
+    
+    ' Abrir el archivo base
+    Set wbBase = Workbooks.Open(rutaArchivo)
+    
+    ' Establecer la hoja activa como la plantilla
+    Set wsPlantilla = ThisWorkbook.Sheets("BBDD Persona")
+    
+    TargetRow = 2 ' Iniciar en la fila 2, debajo del encabezado
+    
+    ' Solicitar el código de BBDD al usuario
+    codigoBBDD = InputBox("Por favor ingrese el código de BBDD (ejemplo: BRI-062271):")
+    
+    ' Validar si se ingresó un código
+    If codigoBBDD = "" Then
+        MsgBox "No se ingresó un código de BBDD. El proceso se detiene.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Recorrer todas las hojas del archivo base
+    For Each wsBase In wbBase.Sheets
+        ' Determinar la última fila con datos en la hoja actual
+        LastRow = wsBase.Cells(wsBase.Rows.Count, "B").End(xlUp).Row
+        
+        ' Recorrer cada celda en la columna B
+        For Each cell In wsBase.Range("B1:B" & LastRow)
+            If cell.Value = "Nuevo" Then
+                ' Mapear los datos en la plantilla
+                wsPlantilla.Cells(TargetRow, "C").Value = wsBase.Cells(cell.Row, "R").Value ' Mapear Columna D de la base a B en la plantilla
+                wsPlantilla.Cells(TargetRow, "D").Value = wsBase.Cells(cell.Row, "O").Value
+                wsPlantilla.Cells(TargetRow, "K").Value = wsBase.Cells(cell.Row, "S").Value
+                wsPlantilla.Cells(TargetRow, "L").Value = wsBase.Cells(cell.Row, "G").Value
+                wsPlantilla.Cells(TargetRow, "P").Value = wsBase.Cells(cell.Row, "P").Value
+                wsPlantilla.Cells(TargetRow, "DE").Value = wsBase.Cells(cell.Row, "L").Value
+                wsPlantilla.Cells(TargetRow, "DH").Value = wsBase.Cells(cell.Row, "K").Value
+                
+                wsPlantilla.Cells(TargetRow, "A").Value = "Sí" ' Añadir "Sí" en la columna A de la plantilla
+                wsPlantilla.Cells(TargetRow, "O").Value = "Sí"
+                wsPlantilla.Cells(TargetRow, "Q").Value = "Sí"
+                wsPlantilla.Cells(TargetRow, "Z").Value = "Sí"
+                wsPlantilla.Cells(TargetRow, "AC").Value = "No"
+                wsPlantilla.Cells(TargetRow, "AP").Value = "Sí"
+                
+                wsPlantilla.Cells(TargetRow, "Y").Value = "Landing page"
+                wsPlantilla.Cells(TargetRow, "DS").Value = "Landing page"
+                
+                wsPlantilla.Cells(TargetRow, "FA").Value = "Activo"
+                wsPlantilla.Cells(TargetRow, "FB").Value = "Activo"
+                
+                wsPlantilla.Cells(TargetRow, "B").Value = "-" & wsBase.Cells(cell.Row, "R").Value
+                wsPlantilla.Cells(TargetRow, "AX").Value = StrConv(wsBase.Cells(cell.Row, "D").Value, vbProperCase) 'NOMBREPROPIO
+                wsPlantilla.Cells(TargetRow, "AZ").Value = StrConv(wsBase.Cells(cell.Row, "E").Value, vbProperCase) 'NOMBREPROPIO
+                
+                wsPlantilla.Cells(TargetRow, "AV").Value = Replace(wsBase.Cells(cell.Row, "I").Value, " ", "") 'DNI SIN ESPACIO
+                wsPlantilla.Cells(TargetRow, "BO").Value = Replace(wsBase.Cells(cell.Row, "J").Value, " ", "") 'CEL SIN ESPACIO
+                wsPlantilla.Cells(TargetRow, "CD").Value = LCase(Replace(wsBase.Cells(cell.Row, "F").Value, " ", "")) 'CORREO SIN ESPACIOS Y MINUSCULAS
+                
+                wsPlantilla.Cells(TargetRow, "EY").Value = "Charla Informativa - "
+                
+                Dim valorOriginal As String
+                Dim valorCorregido As String
+                
+                ' Procesar el primer campo
+                valorOriginal = wsBase.Cells(cell.Row, "M").Value
+                valorCorregido = Replace(valorOriginal, " ", "")
+                valorCorregido = LCase(valorCorregido)
+                
+                If valorCorregido = "si" Or valorCorregido = "sí" Or valorCorregido = "s" Then
+                    valorCorregido = "Sí"
+                ElseIf valorCorregido = "no" Or valorCorregido = "n" Then
+                    valorCorregido = "No"
+                Else
+                    valorCorregido = "--Sin definir--" ' Valor por defecto
+                End If
+                
+                ' Mapear el primer campo en la columna AQ de la plantilla
+                wsPlantilla.Cells(TargetRow, "AQ").Value = valorCorregido
+                
+                ' Procesar el segundo campo
+                valorOriginal = wsBase.Cells(cell.Row, "N").Value
+                valorCorregido = Replace(valorOriginal, " ", "")
+                valorCorregido = LCase(valorCorregido)
+                
+                If valorCorregido = "si" Or valorCorregido = "sí" Or valorCorregido = "s" Then
+                    valorCorregido = "Sí"
+                ElseIf valorCorregido = "no" Or valorCorregido = "n" Then
+                    valorCorregido = "No"
+                Else
+                    valorCorregido = "--Sin definir--" ' Valor por defecto
+                End If
+                
+                ' Mapear el segundo campo en la columna AR de la plantilla
+                wsPlantilla.Cells(TargetRow, "AR").Value = valorCorregido
+                
+                ' Verificar y mapear el campo condicional
+                If wsBase.Cells(cell.Row, "I").Value <> "" Then
+                    wsPlantilla.Cells(TargetRow, "AU").Value = "D.N.I."
+                Else
+                    wsPlantilla.Cells(TargetRow, "AU").Value = ""
+                End If
+                
+                ' Verificar y mapear el campo condicional
+                If wsBase.Cells(cell.Row, "J").Value <> "" Then
+                    wsPlantilla.Cells(TargetRow, "BJ").Value = "Celular"
+                Else
+                    wsPlantilla.Cells(TargetRow, "BJ").Value = ""
+                End If
+                
+                ' Verificar y mapear el campo condicional
+                If wsBase.Cells(cell.Row, "F").Value <> "" Then
+                    wsPlantilla.Cells(TargetRow, "CI").Value = "Correo principal"
+                Else
+                    wsPlantilla.Cells(TargetRow, "CI").Value = ""
+                End If
+                
+                ' Mapeo del código BBDD en las columnas AA y AB
+                wsPlantilla.Cells(TargetRow, "AA").Value = codigoBBDD
+                wsPlantilla.Cells(TargetRow, "AB").Value = codigoBBDD
+                
+                ' Incrementar la fila de destino
+                TargetRow = TargetRow + 1
+            End If
+        Next cell
+    Next wsBase
+    
+    ' Cerrar el archivo base sin guardar cambios
+    wbBase.Close False
+    
+    ' Mostrar un mensaje de salida con emojis
+    MsgBox "Todo mapeado e.e", vbInformation
+End Sub
+
