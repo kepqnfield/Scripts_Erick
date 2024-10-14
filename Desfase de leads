@@ -1,0 +1,39 @@
+Sub ListarRegistrosFHastaOEnUnaColumna()
+
+    ' Declarar variables
+    Dim ws As Worksheet
+    Dim nuevaHoja As Worksheet
+    Dim ultimaFila As Long
+    Dim i As Long, j As Long
+    Dim destino As Range
+    Dim valorCelda As String
+
+    ' Asignar la hoja actual a ws
+    Set ws = ActiveSheet
+
+    ' Encontrar la última fila con datos en la hoja actual
+    ultimaFila = ws.Cells(ws.Rows.Count, "F").End(xlUp).Row
+
+    ' Crear una nueva hoja para los registros
+    Set nuevaHoja = Worksheets.Add
+    nuevaHoja.Name = "Registros Sin Vacíos"
+
+    ' Establecer el rango destino (inicia en A1 de la nueva hoja)
+    Set destino = nuevaHoja.Range("A1")
+
+    ' Recorrer filas y columnas de F a O
+    For i = 2 To ultimaFila ' Empieza desde la fila 2
+        For j = 6 To 15 ' Columnas F = 6 hasta O = 15
+            valorCelda = ws.Cells(i, j).Value
+            ' Si la celda no está vacía, copiar a la nueva hoja
+            If valorCelda <> "" Then
+                destino.Value = valorCelda
+                Set destino = destino.Offset(1, 0) ' Moverse a la siguiente fila en la columna A
+            End If
+        Next j
+    Next i
+
+    ' Mensaje al finalizar
+    MsgBox "Registros listados en la nueva hoja 'Registros Sin Vacíos'."
+
+End Sub
