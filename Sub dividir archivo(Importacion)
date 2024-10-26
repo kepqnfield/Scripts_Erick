@@ -1,0 +1,53 @@
+Sub Test()
+
+    ' Declarar variables
+    Dim wb As Workbook
+    Dim ThisSheet As Worksheet
+    Dim NumOfColumns As Integer
+    Dim RangeToCopy As Range
+    Dim RangeOfHeader As Range
+    Dim WorkbookCounter As Integer
+    Dim RowsInFile As Integer
+    Dim BaseFileName As String
+    Dim FullPath As String
+
+    ' Inicializar variables
+    Application.ScreenUpdating = False
+    Set ThisSheet = ThisWorkbook.ActiveSheet
+    NumOfColumns = ThisSheet.UsedRange.Columns.Count
+    WorkbookCounter = 1
+    
+    ' Cantidad de filas por archivo
+    RowsInFile = 10001
+
+    ' Copiar las cabeceras para mantenerlas en cada archivo
+    Set RangeOfHeader = ThisSheet.Range(ThisSheet.Cells(1, 1), ThisSheet.Cells(1, NumOfColumns))
+
+    ' Obtener el nombre base del archivo actual (sin la extensión)
+    BaseFileName = Left(ThisWorkbook.Name, InStrRev(ThisWorkbook.Name, ".") - 1)
+
+    ' Partir la información en múltiples archivos
+    For p = 2 To ThisSheet.UsedRange.Rows.Count Step RowsInFile - 1
+        
+        Set wb = Workbooks.Add
+        RangeOfHeader.Copy wb.Sheets(1).Range("A1")
+        Set RangeToCopy = ThisSheet.Range(ThisSheet.Cells(p, 1), ThisSheet.Cells(p + RowsInFile - 2, NumOfColumns))
+        RangeToCopy.Copy wb.Sheets(1).Range("A2")
+
+        ' Crear la ruta completa para guardar el archivo
+        FullPath = ThisWorkbook.Path & "\" & BaseFileName & " parte " & WorkbookCounter & ".xml"
+        
+        ' Guardar el nuevo archivo en formato XML (Hoja de cálculo XML 2003)
+        wb.SaveAs Filename:=FullPath, FileFormat:=xlXMLSpreadsheet
+        wb.Close
+    
+        ' Incrementar el contador
+        WorkbookCounter = WorkbookCounter + 1
+    Next p
+
+    Application.ScreenUpdating = True
+    Set wb = Nothing
+
+End Sub
+
+
