@@ -1,0 +1,44 @@
+Sub BuscarCorreos()
+    Dim ws As Worksheet
+    Dim nuevaHoja As Worksheet
+    Dim celda As Range
+    Dim filaResultado As Long
+    
+    ' Crear o seleccionar la hoja para guardar los correos
+    On Error Resume Next
+    Set nuevaHoja = ThisWorkbook.Worksheets("Correos Encontrados")
+    If nuevaHoja Is Nothing Then
+        Set nuevaHoja = ThisWorkbook.Worksheets.Add
+        nuevaHoja.Name = "Correos Encontrados"
+    Else
+        nuevaHoja.Cells.Clear
+    End If
+    On Error GoTo 0
+    
+    ' Establecer encabezado
+    nuevaHoja.Cells(1, 1).Value = "Correos Electrónicos"
+    filaResultado = 2
+    
+    ' Buscar correos en todas las hojas
+    For Each ws In ThisWorkbook.Worksheets
+        If ws.Name <> "Correos Encontrados" Then
+            For Each celda In ws.UsedRange
+                ' Validar que la celda contiene texto
+                If VarType(celda.Value) = vbString Then
+                    ' Verificar si el valor contiene un "@" y parece un correo
+                    If InStr(1, celda.Value, "@") > 0 And InStr(celda.Value, ".") > 0 Then
+                        ' Agregar el correo encontrado a la hoja de resultados
+                        nuevaHoja.Cells(filaResultado, 1).Value = celda.Value
+                        filaResultado = filaResultado + 1
+                    End If
+                End If
+            Next celda
+        End If
+    Next ws
+    
+    ' Ajustar el ancho de la columna
+    nuevaHoja.Columns(1).AutoFit
+    
+    MsgBox "Búsqueda de correos completada. Los resultados están en la hoja 'Correos Encontrados'.", vbInformation
+End Sub
+
